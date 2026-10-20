@@ -13,6 +13,8 @@
 #include <string>
 #include <cctype>
 #include <cmath>
+#include <limits>
+#include <stdexcept>
 
 #include "symbol.h"
 #include "error_handler.h"
@@ -364,6 +366,7 @@ token* scanner::get_token()
 			break;
 		case symbol::pragma_sym:		// pragmas are handled by the scanner not the parser
 			parse_pragma();				// pragma can appear anywhere in the code.
+            return current_token; // parse_pragma has already scanned the following token.
 			break;
 		default:
 			current_token = new token(current_symbol, current_line_number, current_pos_on_line);
@@ -392,15 +395,38 @@ token* scanner::get_token()
 
 void scanner::scan_string()
 {
-    	// Process a string. Need to ensure that a string begins and ends with a
-    	// double quote and that the string is wholly contained on a single line in
-    	// the source file. 2 adjacent double quote marks are interpreted as a single
-    	// double quote character within the string.
-    
-    	// TO BE COMPLETED BEFORE THE SCANNER FUNCTIONS PROPERLY AND THE
-    	// PARSER CAN BE STARTED.
+    // The opening quote is next_char. A doubled quote inside the string
+    // represents one literal quote. Strings cannot cross a source line.
+    current_string_value = "";
+    get_char(); // Skip opening quote.
 
-	// INSERT CODE HERE.
+    while (!eoln_flag && !eof_flag)
+    {
+        if (next_char == '"')
+        {
+            if (following_char() == '"')
+            {
+                current_string_value += '"';
+                get_char(); // Move to the second quote.
+                get_char(); // Move past the doubled quote.
+            }
+            else
+            {
+                current_symbol = new symbol(symbol::strng);
+                // Leave next_char on the closing quote. The caller advances.
+                return;
+            }
+        }
+        else
+        {
+            current_string_value += next_char;
+            get_char();
+        }
+    }
+
+    error->flag(current_line_number, current_pos_on_line, 60);
+    current_symbol = new symbol(symbol::nul);
+    // Do not consume the first character of the next line.
 }
 
 
@@ -508,14 +534,100 @@ void scanner::scan_alpha()
 
 void scanner::scan_digit()
 {
-	// scan in a token beginning with a digit
-	// Note that a unary operator such as -1 would be detected as a minus sign followed by a digit.
+    // Read a decimal integer or real. A period belongs to a number only
+    // when followed by a digit; two periods begin the range operator.
+    string number_text;
+    bool real_number = false;
+    bool bad_number = false;
+    bool negative_exponent = false;
 
-    	// TO BE COMPLETED BEFORE THE SCANNER FUNCTIONS PROPERLY AND THE
-    	// PARSER CAN BE STARTED.
+    while (!eoln_flag && isdigit(static_cast<unsigned char>(next_char)))
+    {
+        number_text += next_char;
+        get_char();
+    }
 
-	// INSERT CODE HERE.
+    if (!eoln_flag && next_char == '.' && following_char() != '.')
+    {
+        real_number = true;
+        number_text += '.';
+        get_char();
+        if (eoln_flag || !isdigit(static_cast<unsigned char>(next_char)))
+        {
+            error->flag(current_line_number, current_pos_on_line, 63);
+            bad_number = true;
+        }
+        while (!eoln_flag && isdigit(static_cast<unsigned char>(next_char)))
+        {
+            number_text += next_char;
+            get_char();
+        }
+    }
 
+    if (!eoln_flag && (next_char == 'E' || next_char == 'e'))
+    {
+        number_text += next_char;
+        get_char();
+        if (!eoln_flag && (next_char == '+' || next_char == '-'))
+        {
+            negative_exponent = next_char == '-';
+            number_text += next_char;
+            get_char();
+        }
+        if (eoln_flag || !isdigit(static_cast<unsigned char>(next_char)))
+        {
+            error->flag(current_line_number, current_pos_on_line, 64);
+            bad_number = true;
+        }
+        while (!eoln_flag && isdigit(static_cast<unsigned char>(next_char)))
+        {
+            number_text += next_char;
+            get_char();
+        }
+        if (!real_number && negative_exponent)
+        {
+            error->flag(current_line_number, current_pos_on_line, 67);
+            bad_number = true;
+        }
+    }
+
+    if (bad_number)
+    {
+        current_symbol = new symbol(symbol::nul);
+        return;
+    }
+
+    try
+    {
+        size_t consumed = 0;
+        if (real_number)
+        {
+            double value = stod(number_text, &consumed);
+            if (consumed != number_text.size() || !isfinite(value) ||
+                abs(value) > numeric_limits<float>::max())
+                throw out_of_range("real out of range");
+            current_real_value = static_cast<float>(value);
+            current_symbol = new symbol(symbol::real_num);
+        }
+        else
+        {
+            // stod handles exponent notation such as 1234E2, which is
+            // still an integer in lille when there is no decimal point.
+            double value = stod(number_text, &consumed);
+            if (consumed != number_text.size() || !isfinite(value) ||
+                value > numeric_limits<int>::max() ||
+                value < numeric_limits<int>::min())
+                throw out_of_range("integer out of range");
+            current_integer_value = static_cast<int>(value);
+            current_symbol = new symbol(symbol::integer);
+        }
+    }
+    catch (const exception&)
+    {
+        error->flag(current_line_number, current_pos_on_line,
+                    real_number ? 66 : 68);
+        current_symbol = new symbol(symbol::nul);
+    }
 }
 
 
