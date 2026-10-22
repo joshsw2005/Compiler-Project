@@ -412,6 +412,14 @@ void scanner::scan_string()
             }
             else
             {
+                // Lille does not permit an empty string literal.
+                if (current_string_value.empty())
+                {
+                    error->flag(current_line_number, current_pos_on_line, 124);
+                    current_symbol = new symbol(symbol::nul);
+                    return;
+                }
+
                 current_symbol = new symbol(symbol::strng);
                 // Leave next_char on the closing quote. The caller advances.
                 return;

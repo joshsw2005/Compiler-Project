@@ -208,6 +208,7 @@ void error_handler::initialize_error_messages()
 	error_message[121] = "Function call expected.";
 	error_message[122] = "Formal and actual parameter types do not match.";
 	error_message[123] = "Functions can only have value parameters.";
+	error_message[124] = "Empty strings are not allowed.";
 
 }
 
