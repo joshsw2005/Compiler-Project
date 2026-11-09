@@ -1,0 +1,8 @@
+program missingthen is
+x : integer;
+begin
+    x := 3;
+    if x > 0
+        writeln("positive");
+    end if;
+end missingthen;

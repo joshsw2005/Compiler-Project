@@ -1,0 +1,15 @@
+program nested is
+x : integer;
+begin
+    x := 2 + 3 * (4 + 1);
+    if x > 10 then
+        writeln("large");
+    elsif x = 10 then
+        writeln("equal");
+    else
+        writeln("small");
+    end if;
+    while x > 0 loop
+        x := x - 1;
+    end loop;
+end nested;

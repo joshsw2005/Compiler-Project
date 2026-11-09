@@ -1,0 +1,12 @@
+program declarations is
+x, y : integer;
+message : constant string := "hello";
+procedure show(n : value integer) is
+begin
+    writeln(n);
+end show;
+begin
+    x := 1;
+    y := 2;
+    show(x + y);
+end declarations;
