@@ -1,5 +1,4 @@
 /* Joshua Wijesinghe | CSC-4510 | Recursive-descent Lille syntax parser.
- * Original starter-code copyright and author notices remain in their files.
  */
 #ifndef PARSER_H
 #define PARSER_H
