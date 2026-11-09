@@ -1,5 +1,5 @@
-all:	compiler.o error_handler.o lille_exception.o scanner.o id_table.o symbol.o token.o
-	g++ -o compiler compiler.o error_handler.o lille_exception.o scanner.o symbol.o token.o
+all:	compiler.o error_handler.o lille_exception.o scanner.o id_table.o symbol.o token.o parser.o
+	g++ -o compiler compiler.o error_handler.o lille_exception.o scanner.o symbol.o token.o parser.o
 	echo Compilation complete.
 
 compiler.o:	id_table.o error_handler.o lille_exception.o scanner.o symbol.o compiler.cpp
@@ -23,6 +23,9 @@ symbol.o: symbol.h symbol.cpp
 token.o: lille_exception.o symbol.o token.h token.cpp
 	g++ -std=c++20 -c token.cpp
 
+parser.o: parser.cpp parser.h
+	g++ -std=c++20 -c parser.cpp
+	
 clean:
 	rm *.o 
 	echo Clean complete
