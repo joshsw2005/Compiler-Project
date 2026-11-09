@@ -16,6 +16,7 @@ bool parser::starts_statement() {
            have(S::null_sym) || have(S::if_sym) || have(S::loop_sym) ||
            have(S::while_sym) || have(S::for_sym);
 }
+// eof is a predefined boolean operation in the Lille semantics; retain support.
 bool parser::starts_expression() {
     return have(S::identifier) || have(S::integer) || have(S::real_num) ||
            have(S::strng) || have(S::true_sym) || have(S::false_sym) ||
@@ -159,6 +160,7 @@ void parser::loop_statement() {
     take(S::end_sym);
     take(S::loop_sym);
 }
+// The grammar requires at least one argument if call parentheses are present.
 void parser::arguments() {
     // Empty parentheses are not in the specified production.
     expression();
