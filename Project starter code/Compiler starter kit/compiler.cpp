@@ -1,3 +1,4 @@
+/* Joshua Wijesinghe | CSC-4510 | Integrated recursive-descent parser with compiler driver. */
  /*************************************************************************************************
  *
  * lille Compiler
@@ -40,7 +41,7 @@
 
 #include "lille_exception.h"
 #include "scanner.h"
-//#include "parser.h"
+#include "parser.h"
 #include "symbol.h"
 #include "error_handler.h"
 //#include "code_gen.h"
@@ -200,15 +201,9 @@ bool process_command_line(int argc, char *argv[]) {
 			else
 				err = new error_handler(source_filename, listing_filename);
 
-			// THE FOLLOWIG CODE IS FOR TESTING PURPOSES ONLY.
-                        scan = new scanner(source_filename, id_tab, err);
-
-                        token* tok;
-                        do
-                        {
-                                tok = scan->get_token();
-                        } while (tok->get_sym() != symbol::end_of_program);
-                        //END OF CODE FOR TESTING PURPOSES
+			scan = new scanner(source_filename, id_tab, err);
+			parser syntax_parser(*scan, *err);
+			syntax_parser.parse();
 
 
 			// Create a symbol_table object
