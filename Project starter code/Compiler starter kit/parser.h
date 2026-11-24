@@ -9,6 +9,7 @@ class parser {
     scanner& scan;
     error_handler& errors;
     using S = symbol::symbol_type;
+    using T = lille_type::lille_ty;
     bool have(S s) { return scan.have(s); }
     void take(S s) { scan.must_be(s); }
     bool accept(S s) { if (have(s)) { take(s); return true; } return false; }
@@ -17,8 +18,8 @@ class parser {
     bool starts_expression();
     void block();
     void declaration();
-    void identifier_list();
-    void type();
+    vector<identifier_info> identifier_list();
+    T type();
     void parameters();
     void parameter();
     void statement_list();

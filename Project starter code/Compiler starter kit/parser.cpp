@@ -1,5 +1,8 @@
+
 /* Joshua Wijesinghe | CSC-4510 | LL(1) recursive-descent parser for Lille.
  * FIRST sets choose alternatives; FOLLOW tokens terminate optional/repeated parts.
+ * Extended to support static semantic analysis, scope management,
+ * identifier checking, and type compatibility.
  */
 #include "parser.h"
 #include <stdexcept>
@@ -42,13 +45,34 @@ void parser::block() {
     take(S::end_sym);
     accept(S::identifier); // Optional closing block name (semantic equality checked later).
 }
-void parser::identifier_list() {
-    take(S::identifier);
-    while (accept(S::comma_sym)) take(S::identifier);
+
+// Collect identifier names and source locations for the symbol table.
+vector<identifier_info> parser::identifier_list() {
+    vector<identifier_info> names;
+
+    do {
+        token* current = scan.this_token();
+
+        identifier_info info;
+        info.name = current->get_identifier_value();
+        info.line = current->get_line_number();
+        info.position = current->get_pos_on_line();
+
+        names.push_back(info);
+        take(S::identifier);
+
+    } while (accept(S::comma_sym));
+
+    return names;
 }
-void parser::type() {
-    if (accept(S::integer_sym) || accept(S::real_sym) ||
-        accept(S::string_sym) || accept(S::boolean_sym)) return;
+
+// Return the declared Lille data type.
+parser::T parser::type() {
+    if (accept(S::integer_sym)) return T::type_integer;
+    if (accept(S::real_sym)) return T::type_real;
+    if (accept(S::string_sym)) return T::type_string;
+    if (accept(S::boolean_sym)) return T::type_boolean;
+
     fail(78);
 }
 void parser::parameters() {
@@ -220,4 +244,56 @@ void parser::primary() {
                accept(S::true_sym) || accept(S::false_sym) || accept(S::eof_sym)) {
         return;
     } else fail(84);
+}
+
+// Semantic analysis helper functions.
+
+// Determine whether a type is arithmetic.
+bool parser::is_arithmetic(T type) {
+    return type == T::type_integer ||
+           type == T::type_real;
+}
+
+// Allow matching types and integer-to-real conversion.
+bool parser::compatible(T expected, T actual) {
+    return expected == actual ||
+           (expected == T::type_real &&
+            actual == T::type_integer);
+}
+
+// Constants and for-loop control variables cannot be modified.
+bool parser::is_modifiable(const identifier_info& info) {
+    return info.kind == lille_kind::variable ||
+           info.kind == lille_kind::value_param ||
+           info.kind == lille_kind::ref_param;
+}
+
+// Insert an identifier and check for duplicate declarations.
+void parser::declare_identifier(const identifier_info& info) {
+    if (!identifiers.insert(info)) {
+        semantic_error("Duplicate declaration of " + info.name);
+    }
+}
+
+// Search the active scopes for a declared identifier.
+identifier_info* parser::require_identifier(const string& name) {
+    identifier_info* result = identifiers.lookup(name);
+
+    if (result == nullptr) {
+        semantic_error("Undeclared identifier: " + name);
+    }
+
+    return result;
+}
+
+// Report the first semantic error and stop compilation.
+[[noreturn]] void parser::semantic_error(const string& message) {
+    token* current = scan.this_token();
+
+    cerr << "Semantic error: " << message << endl;
+    cerr << "Line: " << current->get_line_number()
+         << ", Position: " << current->get_pos_on_line()
+         << endl;
+
+    throw std::runtime_error("Semantic analysis stopped");
 }
