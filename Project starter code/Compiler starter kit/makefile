@@ -25,7 +25,13 @@ token.o: lille_exception.o symbol.o token.h token.cpp
 
 parser.o: parser.cpp parser.h
 	g++ -std=c++20 -c parser.cpp
-	
+
+lille_type.o: lille_type.h lille_type.cpp
+	g++ -std=c++20 -c lille_type.cpp
+
+lille_kind.o: lille_kind.h lille_kind.cpp
+	g++ -std=c++20 -c lille_kind.cpp
+		
 clean:
 	rm *.o 
 	echo Clean complete
