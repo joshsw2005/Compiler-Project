@@ -32,8 +32,36 @@ class parser {
     void factor();
     void primary();
     void arguments();
+
+    // Semantic analysis
+    id_table identifiers;
+    int loop_depth = 0;
+
+    // Tracks the enclosing program, procedure, or function.
+    struct block_info {
+        string name;
+        T type;
+        T return_type;
+        bool has_return = false;
+    };
+
+    vector<block_info> blocks;
+
+    // Semantic checking helper functions.
+    bool is_arithmetic(T type);
+    bool compatible(T expected, T actual);
+    bool is_modifiable(const identifier_info& info);
+
+    void declare_identifier(const identifier_info& info);
+    identifier_info* require_identifier(const string& name);
+
+    void register_predefined_functions();
+
+    [[noreturn]] void semantic_error(const string& message);
+
 public:
-    parser(scanner& scanner_ref, error_handler& error_ref) : scan(scanner_ref), errors(error_ref) {}
+    parser(scanner& scanner_ref, error_handler& error_ref)
+        : scan(scanner_ref), errors(error_ref), identifiers(&error_ref) {}
     void parse();
 };
 #endif
