@@ -1,9 +1,12 @@
+
 /* Joshua Wijesinghe | CSC-4510 | Recursive-descent Lille syntax parser.
+ * Extended to support static semantic analysis and type checking.
  */
 #ifndef PARSER_H
 #define PARSER_H
 #include "scanner.h"
 #include "error_handler.h"
+#include "id_table.h"
 
 class parser {
     scanner& scan;
@@ -26,12 +29,12 @@ class parser {
     void statement();
     void if_statement();
     void loop_statement();
-    void expression();
-    void simple_expression();
-    void expression2();
-    void term();
-    void factor();
-    void primary();
+    T expression();
+    T simple_expression();
+    T expression2();
+    T term();
+    T factor();
+    T primary();
     void arguments();
 
     // Semantic analysis
