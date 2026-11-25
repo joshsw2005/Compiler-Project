@@ -38,7 +38,7 @@ class parser {
     void arguments();
 
     // Semantic analysis
-    id_table identifiers;
+    id_table& identifiers;
     int loop_depth = 0;
 
     // Tracks the enclosing program, procedure, or function.
@@ -64,8 +64,9 @@ class parser {
     [[noreturn]] void semantic_error(const string& message);
 
 public:
-    parser(scanner& scanner_ref, error_handler& error_ref)
-        : scan(scanner_ref), errors(error_ref), identifiers(&error_ref) {}
+    parser(scanner& scanner_ref, error_handler& error_ref,
+           id_table& table_ref)
+        : scan(scanner_ref), errors(error_ref), identifiers(table_ref) {}
     void parse();
 };
 #endif

@@ -45,7 +45,7 @@
 #include "symbol.h"
 #include "error_handler.h"
 //#include "code_gen.h"
-//#include "id_table.h"
+#include "id_table.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -201,8 +201,9 @@ bool process_command_line(int argc, char *argv[]) {
 			else
 				err = new error_handler(source_filename, listing_filename);
 
+			id_tab = new id_table(err);
 			scan = new scanner(source_filename, id_tab, err);
-			parser syntax_parser(*scan, *err);
+			parser syntax_parser(*scan, *err, *id_tab);
 			syntax_parser.parse();
 
 
