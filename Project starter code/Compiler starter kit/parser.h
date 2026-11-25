@@ -63,6 +63,13 @@ class parser {
 
     [[noreturn]] void semantic_error(const string& message);
 
+    vector<parameter_info> pending_parameters;
+    identifier_info current_identifier();
+    void check_call(const identifier_info& info);
+    void require_boolean(T t);
+    T arithmetic_result(T a, T b);
+    void check_output_type(T t);
+
 public:
     parser(scanner& scanner_ref, error_handler& error_ref,
            id_table& table_ref)

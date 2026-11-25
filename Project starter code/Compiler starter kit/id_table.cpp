@@ -177,7 +177,7 @@ void id_table::print_inorder(bst_node* root)
     cout << "  Position: " << info.position << endl;
     cout << "  Offset: " << info.offset << endl;
     cout << "  Trace: "
-         << (info.trace ? "Yes" : "No") << endl;
+         << ((info.trace || debug_enabled) ? "Yes" : "No") << endl;
 
     // Print constant information when applicable.
     if (info.kind == lille_kind::constant)

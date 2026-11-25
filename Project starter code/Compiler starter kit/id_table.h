@@ -100,6 +100,7 @@ public:
         const string& name);
 
     void dump_id_table(bool dump_all = true);
+    bool debug_enabled = false;
 };
 
 #endif /* ID_TABLE_H_ */

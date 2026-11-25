@@ -772,7 +772,7 @@ void scanner::parse_pragma()
 	{
 		if (current_symbol->get_sym() == symbol::integer)
         {
-			// INSERT CODE HERE
+			error->set_error_limit(current_integer_value);
         }
 		else
 			error->flag(current_line_number, current_pos_on_line, 71);	// pragma ERROR_LIMIT requires a numeric argument.
@@ -783,7 +783,11 @@ void scanner::parse_pragma()
 			// Turn on tracing flag in the symbol table for this identifier.
 			// Do not generate an error if the identifier is not present!
 		{
-            // INSERT CODE HERE
+            if (id_tab) {
+                auto* entry = id_tab->lookup(current_identifier_name);
+                if (entry) entry->trace = true;
+                else error->flag(current_line_number, current_pos_on_line, 81);
+            }
 		}
 		else
 			error->flag(current_line_number, current_pos_on_line, 72);	// pragma TRACE requires a variable name.
@@ -794,7 +798,11 @@ void scanner::parse_pragma()
             // Turn off tracing flag in the symbol table for this identifier.
             // Do not generate an error if the identifier is not present!
         {
-            // INSERT CODE HERE
+            if (id_tab) {
+                auto* entry = id_tab->lookup(current_identifier_name);
+                if (entry) entry->trace = false;
+                else error->flag(current_line_number, current_pos_on_line, 81);
+            }
         }
 		else
 			error->flag(current_line_number, current_pos_on_line, 72);	// pragma UNTRACE requires a variable name.
@@ -803,7 +811,9 @@ void scanner::parse_pragma()
 	{
 		if (current_symbol->get_sym() == symbol::identifier)
 		{
-			// INSERT CODE HERE
+			if (current_identifier_name == "ON" || current_identifier_name == "OFF") {
+                if (id_tab) id_tab->debug_enabled = current_identifier_name == "ON";
+            } else error->flag(current_line_number, current_pos_on_line, 73);
             // pragma DEBUG requires either ON or OFF as the argument.
 		}
 		else

@@ -1,5 +1,6 @@
-all:	compiler.o error_handler.o lille_exception.o scanner.o id_table.o symbol.o token.o parser.o
-	g++ -o compiler compiler.o error_handler.o lille_exception.o scanner.o symbol.o token.o parser.o
+
+all:	compiler.o error_handler.o lille_exception.o scanner.o id_table.o symbol.o token.o parser.o lille_type.o lille_kind.o
+	g++ -o compiler compiler.o error_handler.o lille_exception.o scanner.o id_table.o symbol.o token.o parser.o lille_type.o lille_kind.o
 	echo Compilation complete.
 
 compiler.o:	id_table.o error_handler.o lille_exception.o scanner.o symbol.o compiler.cpp
@@ -8,7 +9,7 @@ compiler.o:	id_table.o error_handler.o lille_exception.o scanner.o symbol.o comp
 error_handler.o: lille_exception.o token.o error_handler.h error_handler.cpp
 	g++ -std=c++20 -c error_handler.cpp
 
-id_table.o:: id_table.h id_table.cpp
+id_table.o:: id_table.h id_table.cpp lille_type.h lille_kind.h
 	g++ -std=c++20 -c id_table.cpp
 
 lille_exception.o:	lille_exception.h lille_exception.cpp
@@ -23,7 +24,7 @@ symbol.o: symbol.h symbol.cpp
 token.o: lille_exception.o symbol.o token.h token.cpp
 	g++ -std=c++20 -c token.cpp
 
-parser.o: parser.cpp parser.h
+parser.o: parser.cpp parser.h id_table.h
 	g++ -std=c++20 -c parser.cpp
 
 lille_type.o: lille_type.h lille_type.cpp
@@ -33,5 +34,5 @@ lille_kind.o: lille_kind.h lille_kind.cpp
 	g++ -std=c++20 -c lille_kind.cpp
 		
 clean:
-	rm *.o 
+	rm -f *.o
 	echo Clean complete
